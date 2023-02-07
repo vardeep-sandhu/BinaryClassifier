@@ -1,0 +1,17 @@
+# data
+data_root: "dataset/"
+classes: 2
+# training
+
+arch: resnet50
+criterion: traversky
+batch_size: 128 # batch size for training
+batch_size_val: 128  # batch size for validation during training, memory and speed tradeoff
+lr: 0.001
+epochs: 5
+save_path: runs/
+
+# test
+split: test  # split in [train, val and test]
+batch_size_test: 128
+weights:  # add test path
