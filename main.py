@@ -11,6 +11,7 @@ from test import test
 from train import train
 from focal_traversky_loss import FocalTverskyLoss
 import utils
+from datetime import datetime
 
 def get_parser():
     parser = argparse.ArgumentParser(description='PyTorch Point Cloud Semantic Segmentation')
@@ -26,8 +27,9 @@ def get_parser():
 
 def main():
     args = get_parser()
-    name = args.criterion
-    args.save_path = os.path.join(args.save_path, name)
+    
+    date_time_specifier = "{:%Y_%m_%d_%H_%M_%S}".format(datetime.now())
+    args.save_path = os.path.join(args.save_path, args.criterion, date_time_specifier)
 
     if not os.path.exists(args.save_path):
         os.makedirs(args.save_path)
