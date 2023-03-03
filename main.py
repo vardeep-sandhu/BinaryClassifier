@@ -62,14 +62,15 @@ def main():
     logger.info("Classes: {}".format(args.classes))
     
     model = resnet50(weights=ResNet50_Weights.DEFAULT)
-    logger.info(model)
-
-    logger.info('#Model parameters: {}'.format(sum([x.nelement() for x in model.parameters()])))
-
+    
     for param in model.parameters():
         param.requires_grad = False
-    model.fc = nn.Linear(2048, args.classes) 
+
+    model.fc = nn.Linear(2048, args.classes)
     model.cuda()
+    logger.info(model)
+    logger.info('#Model parameters: {}'.format(sum([x.nelement() for x in model.parameters()])))
+
 
     # Defining the optimizer and the loss criterion
     optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)

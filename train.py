@@ -7,10 +7,9 @@ def train(model, train_loader, device, val_loader, optimizer, loss_fn, args, log
     accuracies = []
     epoches = args.epochs
     start = time.time()
-    
-    # Model Training...
     for epoch in range(epoches):
 
+    
         epoch_loss = 0
         epoch_accuracy = 0
         # progress_bar_train = tqdm(enumerate(train_loader), total=len(train_loader))
@@ -19,7 +18,6 @@ def train(model, train_loader, device, val_loader, optimizer, loss_fn, args, log
             X, y = X.float().to(device), y.to(device)
             preds = model(X)
             loss = loss_fn(preds, y)
-
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()

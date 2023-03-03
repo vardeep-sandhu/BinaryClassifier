@@ -4,9 +4,9 @@ classes: 2
 # training
 
 arch: resnet50
-criterion: traversky
-batch_size: 128 # batch size for training
-batch_size_val: 128  # batch size for validation during training, memory and speed tradeoff
+criterion: traversky #[traversky, cross_entropy]
+batch_size: 8 # batch size for training
+batch_size_val: 8  # batch size for validation during training, memory and speed tradeoff
 lr: 0.001
 epochs: 5
 save_path: runs/
