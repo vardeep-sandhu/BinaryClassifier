@@ -93,9 +93,7 @@ def main():
             logger.info("=> loaded weight '{}'".format(args.weights))
         else:
             logger.info("=> no weight found at '{}'".format(args.weights))
-
-    # Training the model and evaluating on the validation test
-    if args.weights is None:
+    elif args.weights is None:
         train(model, train_loader, device, val_loader, optimizer, criterion, args, logger)
         # Saving model
         filename = os.path.join(args.save_path, 'model.pth')
@@ -104,8 +102,16 @@ def main():
         logger.info('==>Training done!')
 
     # Evaluating the model on the test set
-    test(model, test_loader, device, criterion, logger)
-    logger.info('==>Testing done!')
+    # test(model, test_loader, device, criterion, logger)
+    # logger.info('==>Testing done!')
+    traced_model = torch.jit.trace(model, [torch.randn(32, 3, 224, 224).to("cuda")])
+
+    import torch_tensorrt as trt
+    trt_model = trt.compile(traced_model, 
+                            inputs=[trt.Input((32, 3, 224, 224), dtype=torch.float32)],
+                            enabled_precisions= {torch.float32}
+                            )
+    # test(trt_model, test_loader, device, criterion, logger)
 
 if __name__ == "__main__":
     main()
