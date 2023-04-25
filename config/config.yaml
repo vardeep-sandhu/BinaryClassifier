@@ -1,0 +1,17 @@
+# data
+data_root: "dataset/"
+classes: 2
+# training
+
+arch: resnet50
+criterion: traversky #[traversky, cross_entropy]
+batch_size: 8 # batch size for training
+batch_size_val: 8 # batch size for validation during training, memory and speed tradeoff
+lr: 0.001
+epochs: 5
+save_path: runs/
+
+# test
+split: test # split in [train, val and test]
+batch_size_test: 128
+weights: ./runs/traversky/2023_03_05_21_30_33/model.pth # add test path

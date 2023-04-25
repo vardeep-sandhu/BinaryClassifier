@@ -1,7 +1,7 @@
 import torch
-from dataloader import ImageDataset 
+from dataloader import ImageDataset
 import torch.nn as nn
-from torchvision import  transforms
+from torchvision import transforms
 from torch.utils.data import DataLoader
 from torchvision.models import resnet50, ResNet50_Weights
 
@@ -13,11 +13,15 @@ from focal_traversky_loss import FocalTverskyLoss
 import utils
 from datetime import datetime
 
+
 def get_parser():
-    parser = argparse.ArgumentParser(description='PyTorch Point Cloud Semantic Segmentation')
-    parser.add_argument('opts', help='see config/radar_scenes/radar_scenes_stratified.yaml for all options', default=None, nargs=argparse.REMAINDER)
-    parser.add_argument('--config', type=str, default='config.yaml', help='config file')
-    
+    parser = argparse.ArgumentParser(
+        description='PyTorch Point Cloud Semantic Segmentation')
+    parser.add_argument('opts', help='see config/radar_scenes/radar_scenes_stratified.yaml for all options',
+                        default=None, nargs=argparse.REMAINDER)
+    parser.add_argument('--config', type=str,
+                        default='config/config.yaml', help='config file')
+
     args = parser.parse_args()
     assert args.config is not None
     cfg = utils.load_cfg_from_cfg_file(args.config)
@@ -25,58 +29,65 @@ def get_parser():
         cfg = utils.merge_cfg_with_args(cfg, args.opts)
     return cfg
 
+
 def main():
     args = get_parser()
-    
+
     date_time_specifier = "{:%Y_%m_%d_%H_%M_%S}".format(datetime.now())
-    args.save_path = os.path.join(args.save_path, args.criterion, date_time_specifier)
+    args.save_path = os.path.join(
+        args.save_path, args.criterion, date_time_specifier)
 
     if not os.path.exists(args.save_path):
         os.makedirs(args.save_path)
-    
+
     logger = utils.get_logger(output=args.save_path)
     logger.info(f"The save path is: {args.save_path}")
 
     if not os.path.exists(args.save_path):
         os.makedirs(args.save_path)
-    
-    device = "cuda" if torch.cuda.is_available() else "cpu" 
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     logger.info("=> creating model ...")
     transform = transforms.Compose([
-                transforms.Resize((224, 224)),
-                transforms.ToTensor(),
-                transforms.Normalize((0.5,), (0.5,))
-                ])
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,))
+    ])
     # Splitting our dataset into train, val and test with ratio [75, 15, 15]
 
-    train_data = ImageDataset(args.data_root, transform= transform, split="train")
-    val_data = ImageDataset(args.data_root, transform= transform, split="val")
-    test_data = ImageDataset(args.data_root, transform= transform, split="test")
+    train_data = ImageDataset(
+        args.data_root, transform=transform, split="train")
+    val_data = ImageDataset(args.data_root, transform=transform, split="val")
+    test_data = ImageDataset(args.data_root, transform=transform, split="test")
 
-    logger.info(f"The number of samples in train, val and test are: {len(train_data)}, {len(test_data)}, {len(val_data)}")
+    logger.info(
+        f"The number of samples in train, val and test are: {len(train_data)}, {len(test_data)}, {len(val_data)}")
 
-    train_loader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True)
-    val_loader = DataLoader(val_data, batch_size=args.batch_size_val, shuffle=False)
-    test_loader = DataLoader(test_data, batch_size=args.batch_size_test, shuffle=False)
+    train_loader = DataLoader(
+        train_data, batch_size=args.batch_size, shuffle=True)
+    val_loader = DataLoader(
+        val_data, batch_size=args.batch_size_val, shuffle=False)
+    test_loader = DataLoader(
+        test_data, batch_size=args.batch_size_test, shuffle=False)
 
-    # Getting a pretrained ResNet model and training only the FC last layer 
+    # Getting a pretrained ResNet model and training only the FC last layer
     logger.info("=> creating model ...")
     logger.info("Classes: {}".format(args.classes))
-    
+
     model = resnet50(weights=ResNet50_Weights.DEFAULT)
-    
+
     for param in model.parameters():
         param.requires_grad = False
 
     model.fc = nn.Linear(2048, args.classes)
     model.cuda()
     logger.info(model)
-    logger.info('#Model parameters: {}'.format(sum([x.nelement() for x in model.parameters()])))
-
+    logger.info('#Model parameters: {}'.format(
+        sum([x.nelement() for x in model.parameters()])))
 
     # Defining the optimizer and the loss criterion
-    optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
-    
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
     if args.criterion == "traversky":
         criterion = FocalTverskyLoss()
     elif args.criterion == "cross_entropy":
@@ -94,24 +105,28 @@ def main():
         else:
             logger.info("=> no weight found at '{}'".format(args.weights))
     elif args.weights is None:
-        train(model, train_loader, device, val_loader, optimizer, criterion, args, logger)
+        train(model, train_loader, device, val_loader,
+              optimizer, criterion, args, logger)
         # Saving model
         filename = os.path.join(args.save_path, 'model.pth')
-        torch.save({'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()}, filename)
+        torch.save({'state_dict': model.state_dict(),
+                   'optimizer': optimizer.state_dict()}, filename)
         logger.info('Saving checkpoint to: ' + filename)
         logger.info('==>Training done!')
 
     # Evaluating the model on the test set
     # test(model, test_loader, device, criterion, logger)
     # logger.info('==>Testing done!')
-    traced_model = torch.jit.trace(model, [torch.randn(32, 3, 224, 224).to("cuda")])
+    # traced_model = torch.jit.trace(
+    #     model, [torch.randn(32, 3, 224, 224).to("cuda")])
 
-    import torch_tensorrt as trt
-    trt_model = trt.compile(traced_model, 
-                            inputs=[trt.Input((32, 3, 224, 224), dtype=torch.float32)],
-                            enabled_precisions= {torch.float32}
-                            )
-    # test(trt_model, test_loader, device, criterion, logger)
+    # import torch_tensorrt as trt
+    # trt_model = trt.compile(traced_model,
+    #                         inputs=[trt.Input((32, 3, 224, 224), dtype=torch.float32)],
+    #                         enabled_precisions= {torch.float32}
+    #                         )
+    # # test(trt_model, test_loader, device, criterion, logger)
+
 
 if __name__ == "__main__":
     main()

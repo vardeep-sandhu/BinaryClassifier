@@ -1,10 +1,16 @@
 # Binary Classification Project
 
-This project is focused on performing binary classification on a dataset of [insert description of dataset]. The goal of the project is to create a model that can accurately predict the target variable (i.e., the binary classification label) based on the given features.
+This project is focused on performing binary classification on a dataset that I got online. The images are of towels in different states and is separated into 2 classes valid and non-valid. The goal of the project is to create a model that can accurately predict the target variable (i.e., the binary classification label) based on the given features.
 
 ## Getting Started
 
-To get started with this project, you will need to [insert any prerequisite software, data, or hardware requirements]. Once you have all the necessary resources, you can proceed with the following steps:
+To get started with this project, you will need the following versions of differnt tools.
+
+1. conda create -n binary_classification python=3.8
+2. conda install pytorch==1.13.0 torchvision==0.14.0 torchaudio==0.13.0 pytorch-cuda=11.6 -c pytorch -c nvidia
+
+
+Once you have all the necessary resources, you can proceed with the following steps:
 
 1. Clone this repository to your local machine.
 2. Install any required dependencies using [insert instructions, e.g., pip].

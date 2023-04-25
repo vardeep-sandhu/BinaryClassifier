@@ -1,5 +1,8 @@
+packaging
 tqdm
-#torch
 scikit-learn
 PyYAML
 easydict
+torch_tensorrt
+jupyterlab
+pycuda
