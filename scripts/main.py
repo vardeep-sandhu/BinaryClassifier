@@ -115,8 +115,8 @@ def main():
         logger.info('==>Training done!')
 
     # Evaluating the model on the test set
-    # test(model, test_loader, device, criterion, logger)
-    # logger.info('==>Testing done!')
+    test(model, test_loader, device, criterion, logger)
+    logger.info('==>Testing done!')
     # traced_model = torch.jit.trace(
     #     model, [torch.randn(32, 3, 224, 224).to("cuda")])
 
